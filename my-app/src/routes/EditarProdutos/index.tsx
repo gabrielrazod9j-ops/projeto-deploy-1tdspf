@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { buscar, enviar } from "../../services/api";
 import type { TipoProduto } from "../../types/types";
 
 export default function EditarProdutos() {
@@ -17,18 +18,7 @@ export default function EditarProdutos() {
     const carregaProduto = async () => {
 
       try {
-        // const response = await fetch("http://localhost:3001/produtos/"+id);
-        const response = await fetch(`http://localhost:3001/produtos/${id}`);
-
-        //TRATAMENTO DE ERRO
-        if (!response.ok) {
-          throw new Error(
-            `Erro na listagem dos produtos: ${response.status} - ${response.statusText}`,
-          );
-        }
-
-        //SUCESSO
-        const data: TipoProduto = await response.json();
+        const data = await buscar<TipoProduto>(id!);
         setProduto(data);
 
       } catch (error) {
@@ -38,25 +28,12 @@ export default function EditarProdutos() {
 
     carregaProduto();
 
-  }, []);
+  }, [id]);
 
   const handleUpdate = async () => {
     try {
 
-      const response = await fetch(`http://localhost:3001/produtos/${produto.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(produto)
-      });
-
-      //ERRO
-      if (!response.ok) {
-        throw new Error(
-          `Erro na atualização do produto: ${response.status} - ${response.statusText}`,
-        );
-      }
+      await enviar("PUT", produto);
 
       //SUCESSO
       alert("Produto atualizado com sucesso!");
@@ -65,12 +42,14 @@ export default function EditarProdutos() {
 
     } catch (error) {
       console.error(error);
+      alert("Erro ao atualizar o produto.");
     }
   }
 
   return (
     <main>
       <h2>Editar Produtos</h2>
+      <h1>{id}</h1>
       <h1>{id}</h1>
       <div>
         <form>
@@ -82,7 +61,7 @@ export default function EditarProdutos() {
             </div>
             <div>
               <label htmlFor="preco">Preço do produto </label>
-              <input type="number" step={0.1} name="preco" id="preco" value={produto.preco} onChange={(e) => setProduto({ ...produto, preco: parseFloat(e.target.value) })} />
+              <input type="number" step={0.1} name="preco" id="preco" value={produto.preco} onChange={(e) => setProduto({ ...produto, preco: parseFloat(e.target.value) || 0 })} />
             </div>
             <div>
               <label htmlFor="descricao">Descrição do produto </label>

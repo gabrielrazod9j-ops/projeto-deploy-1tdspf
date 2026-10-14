@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { listar, enviar } from "../../services/api";
 import type { TipoProduto } from "../../types/types";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import CardProduto from "../../components/CardProduto";
 import { FaEdit as Editar } from "react-icons/fa";
 import { MdDeleteForever as Excluir } from "react-icons/md";
@@ -9,22 +10,12 @@ export default function Produtos() {
   // Para alterar o título da página:
   document.title = "Produtos";
 
-  const navigate = useNavigate();
-
   const [produtos, setProdutos] = useState<TipoProduto[]>([]);
 
   useEffect(() => {
     const carregaProdutos = async () => {
       try {
-        const response = await fetch("http://localhost:3001/produtos");
-
-        if (!response.ok) {
-          throw new Error(
-            `Erro na listagem dos produtos: ${response.status} - ${response.statusText}`,
-          );
-        }
-
-        const data: TipoProduto[] = await response.json();
+        const data = await listar<TipoProduto[]>();
         setProdutos(data);
       } catch (error) {
         console.error(error);
@@ -38,26 +29,14 @@ export default function Produtos() {
 
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Deseja realmente excluir este produto?")) return;
     try {
-
-      const response = await fetch(`http://localhost:3001/produtos/${id}`, {
-        method: "DELETE"
-      });
-
-      //ERRO
-      if (!response.ok) {
-        throw new Error(
-          `Erro na exclusão do produto: ${response.status} - ${response.statusText}`,
-        );
-      }
-
-      //SUCESSO
-      alert("Produto exculído com sucesso!");
-      //REDIRECT
-      navigate("/");
-
+      await enviar("DELETE", { id });
+      alert("Produto excluído com sucesso!");
+      setProdutos(produtos.filter((p) => p.id !== id));
     } catch (error) {
       console.error(error);
+      alert("Erro ao excluir o produto.");
     }
   }
 
