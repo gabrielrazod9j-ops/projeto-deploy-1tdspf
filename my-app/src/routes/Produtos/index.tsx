@@ -43,6 +43,7 @@ export default function Produtos() {
   return (
     <main>
       <h2>Produtos</h2>
+      <Link to="/cadastrar-produtos">Cadastrar produto</Link>
 
       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
         {produtos.map((produto) => (
